@@ -38,6 +38,8 @@ private:
     ci::Color   mColToMatch;
     float       mColorTolerance;
     
+    ci::Color   lB, uB;
+    
     typedef std::vector< std::vector<cv::Point> > ContourVector;
     ContourVector   mContours;
     std::vector< std::vector<ci::vec2> > mContourList;
