@@ -28,16 +28,16 @@
 *.app
 
 # Cinder Stuff
-blocks
-#CONTRIBUTING.md
-docs
-include
-lib
-#README.md
-samples
-src
-test
-tools
-vc2013
-vc2015_winrt
-xcode
+brain/blocks
+brain/#CONTRIBUTING.md
+brain/docs
+brain/include
+brain/lib
+brain/#README.md
+brain/samples
+brain/src
+brain/test
+brain/tools
+brain/vc2013
+brain/vc2015_winrt
+brain/xcode
