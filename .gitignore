@@ -26,3 +26,18 @@
 *.exe
 *.out
 *.app
+
+# Cinder Stuff
+blocks
+#CONTRIBUTING.md
+docs
+include
+lib
+#README.md
+samples
+src
+test
+tools
+vc2013
+vc2015_winrt
+xcode
