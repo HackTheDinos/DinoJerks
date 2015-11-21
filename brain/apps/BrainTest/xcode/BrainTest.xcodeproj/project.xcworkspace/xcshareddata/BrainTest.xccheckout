@@ -10,31 +10,31 @@
 	<string>BrainTest</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>AD4B458D0D225ED63FAE0155615993B7D3ECE020</key>
-		<string>https://github.com/cinder/Cinder.git</string>
+		<key>D95ABCFC08C0CF44848784655E8065535EEB2BFB</key>
+		<string>github.com:HackTheDinos/DinoJerks.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>apps/BrainTest/xcode/BrainTest.xcodeproj</string>
+	<string>brain/apps/BrainTest/xcode/BrainTest.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>AD4B458D0D225ED63FAE0155615993B7D3ECE020</key>
-		<string>../../../../..</string>
+		<key>D95ABCFC08C0CF44848784655E8065535EEB2BFB</key>
+		<string>../../../../../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>https://github.com/cinder/Cinder.git</string>
+	<string>github.com:HackTheDinos/DinoJerks.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>AD4B458D0D225ED63FAE0155615993B7D3ECE020</string>
+	<string>D95ABCFC08C0CF44848784655E8065535EEB2BFB</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>AD4B458D0D225ED63FAE0155615993B7D3ECE020</string>
+			<string>D95ABCFC08C0CF44848784655E8065535EEB2BFB</string>
 			<key>IDESourceControlWCCName</key>
-			<string>Cinder_dev</string>
+			<string>DinoJerks</string>
 		</dict>
 	</array>
 </dict>
