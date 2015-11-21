@@ -41,3 +41,6 @@ brain/tools
 brain/vc2013
 brain/vc2015_winrt
 brain/xcode
+
+# OSX
+.DS_Store
