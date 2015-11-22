@@ -205,7 +205,7 @@ void BrainGrabber::findContours( int slice )
 			p *= scale;
 			
 			vec3 vert = vec3(p, z);
-			vert.x -= 0.5;
+//			vert.x -= 0.5;
 			
             tVertBatch->color( 1,0,0 );
 			tVertBatch->vertex( vert );
@@ -287,7 +287,7 @@ void BrainGrabber::draw2D()
             float scsc = fminf(1.0f / mSliceDataList.size(), fminf(1.0f / surfSize.x, 1.0 / surfSize.y));
             
 			gl::translate( vec2(250, 0) );
-			gl::translate( surfSize.x * 0.5, 0 );
+//			gl::translate( surfSize.x * 0.5, 0 );
 			gl::scale( vec2(1.0 / scsc) );
 			
 			if( sd->mVertBatchList.size() ){
