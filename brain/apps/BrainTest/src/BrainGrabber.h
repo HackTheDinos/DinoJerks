@@ -28,29 +28,47 @@ public:
     void draw();
     
     void openFileDialog();
-    
-    pretzel::PretzelGuiRef   mGui;
 
 private:
-    void findContours( ci::Surface tex );
+    enum BRAIN_VIEW_MODE {
+        MODE_2D = 0,
+        MODE_3D
+    };
+    
+    struct SliceData {
+        int             uuid;
+        bool            bNeedsRecalc;
+        ci::Surface     mSurface;
+        std::vector<ci::gl::VertBatchRef> mContourList;
+    };
+    
+    void draw2D();
+    void draw3D();
+    
+    void findContours();
+    
+    pretzel::PretzelGuiRef   mGui;
+    
+    std::vector<SliceData>  mSliceDataList;
     
     // ALL LOADED IMAGES
-    std::vector<ci::Surface> mSurfList;
-  
-    int mCurImageNum;
+    int mCurSliceNum;
     
     // COLOR CORRECTION
     ci::Color   mColToMatch;
     float       mColorTolerance;
     ci::Color   lB, uB;
-    bool        bRegenContours;
+    
+    // hack settings
+    ci::Color   mLastColor;
+    float       mLastTolerance;
     
     // CONTOUR FINDER
     typedef std::vector< std::vector<cv::Point> > ContourVector;
     ContourVector   mContours;
-    std::vector< std::vector<ci::vec2> > mContourList;
     
-    ci::gl::VertBatchRef   mVerts;
+    // VIEW
+    BRAIN_VIEW_MODE mCurrentViewMode;
     
     // DEBUG
     ci::gl::TextureRef mDebugTex;
