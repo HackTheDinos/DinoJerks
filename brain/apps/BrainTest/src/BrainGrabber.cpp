@@ -34,6 +34,8 @@ BrainGrabber::BrainGrabber() :
         mGui->setPos( vec2(0) );
         mGui->setSize( vec2(250, getWindowHeight()) );
     });
+	
+	mSlider = new BrainSlider(ci::Rectf(250 + 50, getWindowHeight() - 100, getWindowWidth() - 50, getWindowHeight() - 100 + 20));
 }
 
 void BrainGrabber::setup()
@@ -89,6 +91,8 @@ void BrainGrabber::openFileDialog()
 
 void BrainGrabber::update()
 {
+    mCurSliceNum = floor( mSlider->getPosition() * (float)(mSliceDataList.size()-1) );
+    
     // If any settings have changed, mark all slices to redo calculations
     if( mLastTolerance != mColorTolerance || mLastColor != mColToMatch ){
         for( int i=0; i<mSliceDataList.size(); i++ ){
@@ -126,6 +130,7 @@ void BrainGrabber::findContours()
     mDebugTex = gl::Texture::create( fromOcv(input) );
     
     // find outlines
+
     mSliceDataList[mCurSliceNum].mContourList.clear();
     
     cv::findContours(input, mContours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
@@ -195,9 +200,14 @@ void BrainGrabber::draw2D()
                     }
                 }
             }
-            
         }gl::popMatrices();
     }
+	
+    pretzel::PretzelGui::drawAll();
+	mSlider->draw();
+	
+
+	gl::drawString("Current Slice: " + to_string(mCurSliceNum) + " / " + to_string(mSliceDataList.size()), vec2(300, getWindowHeight() - 70));
 
 }
 

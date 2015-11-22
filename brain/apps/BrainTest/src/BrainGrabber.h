@@ -17,6 +17,8 @@
 
 #include "pretzel/PretzelGui.h"
 
+#include "BrainSlider.h"
+
 class BrainGrabber
 {
     
@@ -72,4 +74,6 @@ private:
     
     // DEBUG
     ci::gl::TextureRef mDebugTex;
+	
+	BrainSlider *mSlider;
 };
