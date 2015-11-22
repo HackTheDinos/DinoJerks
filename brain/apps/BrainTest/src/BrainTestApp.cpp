@@ -11,7 +11,7 @@ using namespace std;
 class BrainTestApp : public App {
   public:
 	void setup() override;
-	void mouseDown( MouseEvent event ) override;
+	void keyDown( KeyEvent event ) override;
 	void update() override;
 	void draw() override;
     
@@ -23,8 +23,11 @@ void BrainTestApp::setup()
     mBrain.setup();
 }
 
-void BrainTestApp::mouseDown( MouseEvent event )
+void BrainTestApp::keyDown( KeyEvent event )
 {
+    if( event.getChar() == 'o' && event.isAccelDown() ){
+        mBrain.openFileDialog();
+    }
 }
 
 void BrainTestApp::update()

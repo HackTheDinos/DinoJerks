@@ -13,8 +13,10 @@ using namespace ci::app;
 using namespace std;
 
 BrainGrabber::BrainGrabber() :
-mColorTolerance(0.01),
-mColToMatch(1,1,1)
+    mColorTolerance(0.01),
+    mColToMatch(1,1,1),
+    mCurImageNum(0),
+    bRegenContours(false)
 {
     mGui = pretzel::PretzelGui::create();
     mGui->addColorPicker("Brain Color", &mColToMatch);
@@ -23,46 +25,63 @@ mColToMatch(1,1,1)
     
     mGui->loadSettings();
 	
-	mSlider = new BrainSlider(ci::Rectf(100, getWindowHeight() - 100, getWindowWidth() - 200, getWindowHeight() - 100 + 2));
+	mSlider = new BrainSlider(ci::Rectf(100, getWindowHeight() - 100, getWindowWidth() - 200, getWindowHeight() - 100 + 20));
 }
 
 void BrainGrabber::setup()
 {
+    mVerts = gl::VertBatch::create( GL_LINE_LOOP );
+}
+
+void BrainGrabber::openFileDialog()
+{
     fs::path pth = ci::app::getOpenFilePath( getAssetPath("") );
-    
     if( !pth.empty() ){
-        fs::path rootPath = pth.parent_path();
+        mSurfList.clear();
+        bRegenContours = true;
         
+        fs::path rootPath = pth.parent_path();
         for( fs::directory_iterator it(rootPath); it != fs::directory_iterator(); ++it)
         {
+            fs::path pp = *it;
+            if(pp.extension() == ".DS_Store"){
+                continue;
+            }
+            
             vec2 maxSize(600.0, 600.0);
             Surface sf( loadImage(*it) );
             
             vec2 sizeDiff = maxSize / (vec2)sf.getSize();
             float ratio = min(sizeDiff.x, sizeDiff.y);
-            
             vec2 newSize = (vec2)sf.getSize() * vec2(ratio);
+            
+            // save downsampled versions
             Surface rSurf( newSize.x, newSize.y, false );
-            rSurf.copyFrom(sf, ci::Area(0,0,sf.getWidth(), sf.getHeight()) );
+            ip::resize(sf, &rSurf);
             
-            console() << "New size :: " << newSize << " / " << sizeDiff << endl;
+            mSurfList.push_back( rSurf );
             
-            mSurfList.push_back( sf );
+//            ++it;
+//            ++it;
         }
         
     }else{
         console() << "Cancel" << endl;
     }
+
 }
 
 void BrainGrabber::update()
 {
-    if( mSurfList.size() ){
-        findContour( mSurfList[0] );
+    bRegenContours = true;
+    
+    if( mSurfList.size() && bRegenContours){
+        findContours( mSurfList[mCurImageNum] );
+        bRegenContours = false;
     }
 }
 
-void BrainGrabber::findContour( Surface surf )
+void BrainGrabber::findContours( Surface surf )
 {
     cv::Mat input = toOcv( Channel(surf) );
     
@@ -77,21 +96,16 @@ void BrainGrabber::findContour( Surface surf )
     lB = hsvToRgb( lBv );
     uB = hsvToRgb( uBv );
     
-    // these are in bgr?
     cv::Scalar lowerBounds(lB.r * 255.0, lB.g * 255.0, lB.b * 255.0);
     cv::Scalar upperBounds(uB.r * 255.0, uB.g * 255.0, uB.b * 255.0);
     cv::inRange(input, lowerBounds, upperBounds, input);
-    
-    
     
     mDebugTex = gl::Texture::create( fromOcv(input) );
     
     // find outlines
 //    cv::findContours(input, mContours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-    
-    
     return;
-    
+	
     mContourList.clear();
     for (ContourVector::const_iterator iter = mContours.begin(); iter != mContours.end(); ++iter)
     {
@@ -99,12 +113,18 @@ void BrainGrabber::findContour( Surface surf )
         PolyLine2f pl;
         pl.setClosed();
         
-        // FORM POLYLINE AND FIND CENTROID
+        // FORM POLYLINE
+        mVerts->clear();
         for (vector<cv::Point>::const_iterator pt = iter->begin(); pt != iter->end(); ++pt) {
             vec2 p( fromOcv(*pt) );
             mPoints.push_back(p);
             pl.push_back(p);
+            
+            mVerts->color(1,0,0);
+            mVerts->vertex(p);
         }
+        
+        mVerts->end();
         
         mContourList.push_back( mPoints );
     }
@@ -124,22 +144,36 @@ void BrainGrabber::draw()
                 gl::draw( mContourList[0] );
             }
         }
-        
+		
         if(mDebugTex){
-//            ci::color( Color(1,0,0) );
-//            gl::drawSolidRect(
+            gl::color( Color::white() );
             gl::draw(mDebugTex);
         }
         
-        {
-            gl::translate(0, 600);
-            gl::color( mColToMatch );
-            gl::drawSolidRect( Rectf(0,0,50,50) );
-            gl::color( lB );
-            gl::drawSolidRect( Rectf(50,0,100,50) );
-            gl::color( uB );
-            gl::drawSolidRect( Rectf(100,0,150,50) );
-            gl::color( Color::white() );
+        {   // debug color rects
+            gl::pushMatrices();{
+                gl::translate(0, 600);
+                gl::color( mColToMatch );
+                gl::drawSolidRect( Rectf(0,0,50,50) );
+                gl::color( lB );
+                gl::drawSolidRect( Rectf(50,0,100,50) );
+                gl::color( uB );
+                gl::drawSolidRect( Rectf(100,0,150,50) );
+                gl::color( Color::white() );
+            }gl::popMatrices();
+        }
+        
+        // CONTOURS
+        if( mSurfList.size() ){
+//            gl::draw( mDebugTex );
+            
+            if( mContourList.size() ){
+                gl::ScopedColor scCol( 1,0,1,1 );
+//                gl::draw( mContourList[mCurImageNum] );
+                if( !mVerts->empty() ){
+                    mVerts->draw();
+                }
+            }
         }
 		
     }gl::popMatrices();
@@ -147,5 +181,5 @@ void BrainGrabber::draw()
     pretzel::PretzelGui::drawAll();
 	mSlider->draw();
 	
-	gl::drawString("Slider pos: " + to_string(mSlider->getPosition()), vec2(100, getWindowHeight() - 80));
+	gl::drawString("Slider pos: " + to_string(mSlider->getPosition()), vec2(100, getWindowHeight() - 70));
 }

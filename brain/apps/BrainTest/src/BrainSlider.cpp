@@ -18,7 +18,7 @@ using namespace std;
 BrainSlider::BrainSlider(ci::Rectf trackBounds) {
 	const vec2 knobSize = vec2(20, 20);
 	mTrackBounds = trackBounds;
-	mKnobBounds = ci::Rectf(trackBounds.x1, trackBounds.y1 - knobSize.y * 0.5, trackBounds.x1 + knobSize.x, trackBounds.y1 + knobSize.y * 0.5);
+	mKnobBounds = ci::Rectf(trackBounds.x1, trackBounds.getCenter().y - knobSize.y * 0.5, trackBounds.x1 + knobSize.x, trackBounds.getCenter().y + knobSize.y * 0.5);
 	
 	ci::app::getWindow()->getSignalMouseDown().connect([&](MouseEvent event) {
 		mIsDragging = mKnobBounds.contains(event.getPos());
