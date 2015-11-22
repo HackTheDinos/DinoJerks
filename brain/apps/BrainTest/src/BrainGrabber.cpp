@@ -27,7 +27,8 @@ BrainGrabber::BrainGrabber() :
     mGui->addLabel("VIEW MODE");
     mGui->addButton("2D MODE", [&](void*){ mCurrentViewMode = MODE_2D; }, this );
     mGui->addButton("3D MODE", [&](void*){ mCurrentViewMode = MODE_3D; }, this );
-    mGui->addLabel("SAVE / LOAD SETTINGS");
+    mGui->addButton("EXPORT XYZ", [&](void*){ exportXYZ(); }, this );
+	mGui->addLabel("SAVE / LOAD SETTINGS");
     mGui->addSaveLoad();
     
     mGui->loadSettings();
@@ -219,13 +220,23 @@ void BrainGrabber::draw2D()
 
 }
 
+void BrainGrabber::draw3D()
+{
+    
+}
+
+void BrainGrabber::exportXYZ() {
+	std::string str = "";
+	
+	for (int i = 0; i < 100; i++) {
+		str += "x, y, z\n";
+	}
+	
+	saveToFile(str, getAppPath().string() + "/export.xyz");
+}
+
 void BrainGrabber::saveToFile(const string text, const string location) {
 	std::ofstream oStream(location);
 	oStream << text;
 	oStream.close();
-}
-
-void BrainGrabber::draw3D()
-{
-    
 }
