@@ -20,7 +20,7 @@ BrainGrabber::BrainGrabber() :
     mColorTolerance(0.01),
     mColToMatch(1,1,1),
     mCurSliceNum(0),
-    mCurrentViewMode( BRAIN_VIEW_MODE::MODE_3D ),
+    mCurrentViewMode( BRAIN_VIEW_MODE::MODE_2D ),
     mCameraZ(3)
 {
     mGui = pretzel::PretzelGui::create("SETTINGS");
@@ -57,7 +57,7 @@ void BrainGrabber::setup()
 	
     mCamera.lookAt( vec3(0,0,mCameraZ), vec3(0), vec3(0,1,0) );
     mContourFbo = gl::Fbo::create( getWindowWidth() - 250, getWindowHeight() );
-	mArcball = Arcball( &mCamera, Sphere(vec3(0), 0.5) );
+	mArcball = Arcball( &mCamera, Sphere(vec3(0), 1) );
 	
 	getWindow()->getSignalMouseDown().connect([&](MouseEvent event){
 		if (!mSlider->isDragging()) {
@@ -140,7 +140,7 @@ void BrainGrabber::update()
     }
     
     // 3D ----------
-//    mCamera.lookAt( vec3(0,0,mCameraZ), vec3(0), vec3(0,1,0) );
+    mCamera.lookAt( vec3(0,0,mCameraZ), vec3(0), vec3(0,1,0) );
     mCamera.setAspectRatio( (getWindowWidth() - 250) / getWindowHeight() );
 }
 
@@ -171,33 +171,64 @@ void BrainGrabber::findContours( int slice )
     
     cv::findContours(input, mContours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 	
-	float scale = fminf(1.0f / mSliceDataList.size(), fminf(1.0f / curSurf.getWidth(), 1.0 / curSurf.getHeight()));
-	float z = (float)slice * scale;
-    
     // iterate through each contour and save the points
+	vector<vector<vec3>> contourVertices = vector<vector<vec3>>();
+	float minX = 999999;
+	float minY = 999999;
+	float minZ = 999999;
+	float maxX = -999999;
+	float maxY = -999999;
+	float maxZ = -999999;
+	
     for (ContourVector::const_iterator iter = mContours.begin(); iter != mContours.end(); ++iter)
     {
-        gl::VertBatchRef tVertBatch = gl::VertBatch::create(GL_LINE_LOOP);
+		
+		vector<vec3> vertices = vector<vec3>();
 		
         for (vector<cv::Point>::const_iterator pt = iter->begin(); pt != iter->end(); ++pt) {
-
-//            vec2 hImg = (vec2)curSurf.getSize() * vec2(0.5);
-            vec2 p( (vec2)fromOcv(*pt) /*-hImg*/);
-			p *= scale;
+            vec3 vert = vec3((vec2)fromOcv(*pt), slice);
+			vertices.push_back(vert);
 			
-            vec3 vert = vec3(p, z);
-			vert.x -= 0.5;
+			minX = fminf(vert.x, minX);
+			minY = fminf(vert.y, minY);
+			minZ = fminf(vert.z, minZ);
 			
-            tVertBatch->color(vert.x + 0.5, vert.y + 0.5, vert.z + 0.5);
-            tVertBatch->vertex( vert );
+			maxX = fmaxf(vert.x, maxX);
+			maxY = fmaxf(vert.y, maxY);
+			maxZ = fmaxf(vert.z, maxZ);
+		}
+		
+		contourVertices.push_back(vertices);
+    }
+	
+	float w = maxX - minX;
+	float h = maxY - minY;
+	float d = maxZ - minZ;
+//	float scale = fminf(1.0f / w, fminf(1.0f / h, 1.0 / d));
+	vec3 offset = vec3(-w * 0.5, -h * 0.5, -d * 0.5);
+	
+	for (int i = 0; i < contourVertices.size(); ++i) {
+		
+		auto vertices = contourVertices[i];
+		
+		gl::VertBatchRef tVertBatch = gl::VertBatch::create(GL_LINE_LOOP);
+		
+		for (int j = 0; j < vertices.size(); ++j) {
+			
+			vec3 vert = (vertices[j] + offset) * (float)SCALE;
+			vec3 col = vert + vec3(0.5);
+			
+			tVertBatch->color(col.x, col.y, col.z);
+			tVertBatch->vertex(vert);
 			
 			mContourPoints[slice].push_back(vert);
-            mSliceDataList[slice].mVertList.push_back(vert);
-        }
-        tVertBatch->end();
-        
-        mSliceDataList[slice].mVertBatchList.push_back( tVertBatch );
-    }
+			mSliceDataList[slice].mVertList.push_back(vert);
+		}
+		
+		tVertBatch->end();
+		
+		mSliceDataList[slice].mVertBatchList.push_back( tVertBatch );
+	}
 }
 
 void BrainGrabber::recalcAll()
