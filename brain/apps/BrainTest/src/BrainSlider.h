@@ -29,12 +29,12 @@ public:
 	
 	bool isDragging();
 	
+	ci::Rectf mTrackBounds;
+	ci::Rectf mKnobBounds;
+	
 private:
 	
 	void moveTo(float x);
-	
-	ci::Rectf mTrackBounds;
-	ci::Rectf mKnobBounds;
 	
 	ci::vec2 mMousePos = ci::vec2(0,0);
 	bool mIsDragging = false;

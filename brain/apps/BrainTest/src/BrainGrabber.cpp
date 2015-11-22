@@ -48,7 +48,7 @@ mCameraZ(3)
 	
 	float padding = 50;
 	float h = 20;
-	mSlider = new BrainSlider(ci::Rectf(250 + padding, getWindowHeight() - padding - h, getWindowWidth() - padding, getWindowHeight() - padding));
+	mSlider = new BrainSlider(ci::Rectf(250 + padding + 80, getWindowHeight() - padding - h, getWindowWidth() - padding, getWindowHeight() - padding));
 	
 	reloadShader();
 }
@@ -275,19 +275,6 @@ void BrainGrabber::draw2D()
 		gl::draw(mDebugTex, vec2(250, 0) );
 	}
 	
-	// DEBUG COLOR RECTS
-	gl::pushMatrices();{
-		gl::translate( vec2(250, 0) );
-		gl::translate(0, 600);
-		gl::color( mColToMatch );
-		gl::drawSolidRect( Rectf(0,0,50,50) );
-		gl::color( lB );
-		gl::drawSolidRect( Rectf(50,0,100,50) );
-		gl::color( uB );
-		gl::drawSolidRect( Rectf(100,0,150,50) );
-		gl::color( Color::white() );
-	}gl::popMatrices();
-	
 	// CONTOURS
 	if( mSliceDataList.size() ){
 		SliceData *sd = &mSliceDataList[mCurSliceNum];
@@ -308,12 +295,36 @@ void BrainGrabber::draw2D()
 		}gl::popMatrices();
 	}
 	
-	pretzel::PretzelGui::drawAll();
-	mSlider->draw();
-	
+	// DEBUG UI
 	if (mSliceDataList.size() > 0) {
-		gl::drawString("Current Slice: " + to_string(mCurSliceNum + 1) + " / " + to_string(mSliceDataList.size()), vec2(300, getWindowHeight() - 35));
+		float labelPadding = 15;
+		
+		gl::pushMatrices();{
+			float size = 20;
+			
+			gl::translate( mSlider->mTrackBounds.x1 - 5 * size, mSlider->mTrackBounds.y1 );
+			
+			gl::color( Color::white() );
+			gl::drawString("Color Range", vec2(0, size + labelPadding));
+			
+			gl::color( lB );
+			gl::drawSolidRect( Rectf(0,0,size,size) );
+			
+			gl::color( mColToMatch );
+			gl::drawSolidRect( Rectf(size * 1,0,size * 1 + size, size) );
+			
+			gl::color( uB );
+			gl::drawSolidRect( Rectf(size * 2,0,size * 2 + size, size) );
+			
+			gl::color( Color::white() );
+			
+		}gl::popMatrices();
+		
+		mSlider->draw();
+		gl::drawString("Current Slice: " + to_string(mCurSliceNum + 1) + " / " + to_string(mSliceDataList.size()), vec2(mSlider->mTrackBounds.x1, mSlider->mTrackBounds.y2 + labelPadding));
 	}
+	
+	pretzel::PretzelGui::drawAll();
 }
 
 void BrainGrabber::draw3D()
