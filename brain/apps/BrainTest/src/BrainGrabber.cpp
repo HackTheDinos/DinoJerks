@@ -8,6 +8,8 @@
 
 #include "BrainGrabber.h"
 
+#include <fstream>
+
 using namespace ci;
 using namespace ci::app;
 using namespace std;
@@ -26,6 +28,10 @@ BrainGrabber::BrainGrabber() :
     mGui->loadSettings();
 	
 	mSlider = new BrainSlider(ci::Rectf(100, getWindowHeight() - 100, getWindowWidth() - 200, getWindowHeight() - 100 + 20));
+	
+//	getWindow()->getSignalMouseUp().connect([&](MouseEvent event){
+//		saveToFile("test", getAppPath().string() + "/export.xyz");
+//	});
 }
 
 void BrainGrabber::setup()
@@ -182,4 +188,11 @@ void BrainGrabber::draw()
 	mSlider->draw();
 	
 	gl::drawString("Slider pos: " + to_string(mSlider->getPosition()), vec2(100, getWindowHeight() - 70));
+}
+
+
+void BrainGrabber::saveToFile(const string text, const string location) {
+	std::ofstream oStream(location);
+	oStream << text;
+	oStream.close();
 }

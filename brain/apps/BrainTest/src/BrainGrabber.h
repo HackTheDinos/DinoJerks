@@ -30,6 +30,8 @@ public:
     void draw();
     
     void openFileDialog();
+	
+	void saveToFile(std::string text, std::string location);
     
     pretzel::PretzelGuiRef   mGui;
 
