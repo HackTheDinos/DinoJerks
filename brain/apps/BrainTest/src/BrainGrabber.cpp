@@ -10,7 +10,7 @@
 
 #include <fstream>
 
-#define Z_SCALE (1.0/600.0)
+#define SCALE (1.0/600.0)
 
 using namespace ci;
 using namespace ci::app;
@@ -155,6 +155,8 @@ void BrainGrabber::findContours( int slice )
 	mContourPoints[slice].clear();
     
     cv::findContours(input, mContours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+	
+	float scale = fminf(1.0f / mSliceDataList.size(), fminf(1.0f / curSurf.getWidth(), 1.0 / curSurf.getHeight()));
     
     // iterate through each contour and save the points
     for (ContourVector::const_iterator iter = mContours.begin(); iter != mContours.end(); ++iter)
@@ -165,11 +167,12 @@ void BrainGrabber::findContours( int slice )
 
             vec2 hImg = (vec2)curSurf.getSize() * vec2(0.5);
             vec2 p( (vec2)fromOcv(*pt) - hImg );
-            vec2 normPt = p / (vec2)curSurf.getSize();
+			p.x *= scale;
+			p.y *= scale;
+			
+            vec3 vert = vec3(p, (float)slice * scale - 0.5);
             
-            vec3 vert = vec3(normPt, Z_SCALE * curSlice->uuid);
-            
-            tVertBatch->color(vert.x + 0.5, vert.y + 0.5, (float)slice / (float)mSliceDataList.size());
+            tVertBatch->color(p.x + 0.5, p.y + 0.5, vert.z + 0.5);
             tVertBatch->vertex( vert );
 			
 			mContourPoints[slice].push_back(vert);
@@ -267,7 +270,7 @@ void BrainGrabber::draw3D()
         //        gl::ScopedFramebuffer scFbo( mContourFbo );
         gl::setMatrices( mCamera );
         gl::rotate( getElapsedSeconds() * 0.5, vec3(0,1,0) );
-        gl::translate( vec3(0,0,mSliceDataList.size() * -0.5 * Z_SCALE) );
+        gl::translate( vec3(0,0,mSliceDataList.size() * -0.5 * SCALE) );
         //        gl::setMatricesWindowPersp( mContourFbo->getSize() );
         //        gl::ScopedViewport scVp( 250, 0, getWindowWidth(), getWindowHeight() );
         
