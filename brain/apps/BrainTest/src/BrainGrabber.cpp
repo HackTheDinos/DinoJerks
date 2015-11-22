@@ -21,7 +21,8 @@ mColorTolerance(0.01),
 mColToMatch(1,1,1),
 mCurSliceNum(0),
 mCurrentViewMode( BRAIN_VIEW_MODE::MODE_2D ),
-mCameraZ(3)
+mCameraZ(3),
+bViewRawScan(false)
 {
 	mGui = pretzel::PretzelGui::create("SETTINGS");
 	mGui->addButton("OPEN FILES", [&](void*){ openFileDialog(); }, this );
@@ -29,6 +30,7 @@ mCameraZ(3)
 	mGui->addSlider("Tolerance", &mColorTolerance, 0.0, 0.5);
 	
 	mGui->addLabel("VIEW MODE");
+    mGui->addToggle("RAW CT", &bViewRawScan );
 	mGui->addButton("2D MODE", [&](void*){ mCurrentViewMode = MODE_2D; }, this );
 	mGui->addButton("3D MODE", [&](void*){ mCurrentViewMode = MODE_3D; recalcAll(); }, this );
 	mGui->addButton("EXPORT XYZ", [&](void*){ exportXYZ(); }, this );
@@ -174,7 +176,11 @@ void BrainGrabber::findContours( int slice )
 	cv::Scalar upperBounds(uB.r * 255.0, uB.g * 255.0, uB.b * 255.0);
 	cv::inRange(input, lowerBounds, upperBounds, input);
 	
-	mDebugTex = gl::Texture::create( fromOcv(input) );
+    if( bViewRawScan ){
+        mDebugTex = gl::Texture::create( curSlice->mSurface );
+    }else{
+        mDebugTex = gl::Texture::create( fromOcv(input) );
+    }
 	
 	// FIND OUTLINES ----------------------------------------------------------------
 	mSliceDataList[slice].mVertBatchList.clear();

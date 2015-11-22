@@ -95,7 +95,8 @@ private:
     std::vector<ci::vec3>   mAllPoints;
     
     // DEBUG
-    ci::gl::TextureRef mDebugTex;
+    ci::gl::TextureRef  mDebugTex;
+    bool                bViewRawScan;
 	
 	BrainSlider *mSlider;
 	
