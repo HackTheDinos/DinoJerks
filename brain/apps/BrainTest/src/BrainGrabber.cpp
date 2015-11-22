@@ -22,6 +22,8 @@ mColToMatch(1,1,1)
     mGui->addSaveLoad();
     
     mGui->loadSettings();
+	
+	mSlider = new BrainSlider(ci::Rectf(100, getWindowHeight() - 100, getWindowWidth() - 200, getWindowHeight() - 100 + 2));
 }
 
 void BrainGrabber::setup()
@@ -85,7 +87,7 @@ void BrainGrabber::findContour( Surface surf )
     mDebugTex = gl::Texture::create( fromOcv(input) );
     
     // find outlines
-    //    cv::findContours(input, mContours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+//    cv::findContours(input, mContours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
     
     
     return;
@@ -113,6 +115,7 @@ void BrainGrabber::draw()
     gl::pushMatrices();{
         gl::color(1,1,1,1);
         gl::translate( vec2(250, 10) );
+		
         if( mSurfList.size() ){
 //            gl::draw( gl::Texture::create( mSurfList[0] ) );
             
@@ -138,7 +141,11 @@ void BrainGrabber::draw()
             gl::drawSolidRect( Rectf(100,0,150,50) );
             gl::color( Color::white() );
         }
+		
     }gl::popMatrices();
-    
+	
     pretzel::PretzelGui::drawAll();
+	mSlider->draw();
+	
+	gl::drawString("Slider pos: " + to_string(mSlider->getPosition()), vec2(100, getWindowHeight() - 80));
 }

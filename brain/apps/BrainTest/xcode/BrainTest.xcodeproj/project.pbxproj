@@ -32,6 +32,7 @@
 		9B17B247654C408D95491841 /* PretzelGlobal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF765C86750446ECB3BD677C /* PretzelGlobal.cpp */; };
 		9D245C9319BB4E0C991F1B8D /* color-picker.png in Resources */ = {isa = PBXBuildFile; fileRef = A1C2DAA0D55C4E7DBA1AB8B3 /* color-picker.png */; };
 		AF710088BA6645B6B01300D0 /* PretzelGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C59DACFB40EF4238B0EB172A /* PretzelGui.cpp */; };
+		B59B85D61C0139A600CA5027 /* BrainSlider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B59B85D41C0139A600CA5027 /* BrainSlider.cpp */; };
 		C25E9EDEC33B4BF1A9FBE6F8 /* PretzelLabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FDBB89DF664C4C17A52065E1 /* PretzelLabel.cpp */; };
 		CBBECB621C0028430062589B /* BrainGrabber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CBBECB601C0028430062589B /* BrainGrabber.cpp */; };
 		CBBECB641C00311F0062589B /* hslBar.png in Resources */ = {isa = PBXBuildFile; fileRef = CBBECB631C00311F0062589B /* hslBar.png */; };
@@ -78,6 +79,8 @@
 		A1C2DAA0D55C4E7DBA1AB8B3 /* color-picker.png */ = {isa = PBXFileReference; lastKnownFileType = "\"\""; name = "color-picker.png"; path = "../blocks/PretzelGUI/resources/color-picker.png"; sourceTree = "<group>"; };
 		A9AADAB8418C45D7A6099227 /* PretzelRoot.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PretzelRoot.h; path = ../blocks/PretzelGUI/src/components/PretzelRoot.h; sourceTree = "<group>"; };
 		B0842875068F4E34B5D99233 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B59B85D41C0139A600CA5027 /* BrainSlider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BrainSlider.cpp; path = ../src/BrainSlider.cpp; sourceTree = "<group>"; };
+		B59B85D51C0139A600CA5027 /* BrainSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainSlider.h; sourceTree = "<group>"; };
 		BB9D8386202747F4AE482CD0 /* PretzelTextField.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PretzelTextField.h; path = ../blocks/PretzelGUI/src/modules/PretzelTextField.h; sourceTree = "<group>"; };
 		BF765C86750446ECB3BD677C /* PretzelGlobal.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; name = PretzelGlobal.cpp; path = ../blocks/PretzelGUI/src/pretzel/PretzelGlobal.cpp; sourceTree = "<group>"; };
 		C59DACFB40EF4238B0EB172A /* PretzelGui.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = PretzelGui.cpp; path = ../blocks/PretzelGUI/src/pretzel/PretzelGui.cpp; sourceTree = "<group>"; };
@@ -130,8 +133,11 @@
 				83D3269EF24F4B9289D0FA91 /* BrainTestApp.cpp */,
 				CBBECB601C0028430062589B /* BrainGrabber.cpp */,
 				CBBECB611C0028430062589B /* BrainGrabber.h */,
+				B59B85D41C0139A600CA5027 /* BrainSlider.cpp */,
+				B59B85D51C0139A600CA5027 /* BrainSlider.h */,
 			);
 			name = Source;
+			path = ../src;
 			sourceTree = "<group>";
 		};
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
@@ -382,6 +388,7 @@
 				308FBDC364654EAD971500AE /* PretzelToggle.cpp in Sources */,
 				9B17B247654C408D95491841 /* PretzelGlobal.cpp in Sources */,
 				AF710088BA6645B6B01300D0 /* PretzelGui.cpp in Sources */,
+				B59B85D61C0139A600CA5027 /* BrainSlider.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

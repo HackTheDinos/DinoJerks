@@ -16,6 +16,8 @@
 
 #include "pretzel/PretzelGui.h"
 
+#include "BrainSlider.h"
+
 class BrainGrabber
 {
     
@@ -45,4 +47,6 @@ private:
     std::vector< std::vector<ci::vec2> > mContourList;
     
     ci::gl::TextureRef mDebugTex;
+	
+	BrainSlider *mSlider;
 };
