@@ -61,6 +61,7 @@ void BrainGrabber::openFileDialog()
     if( !pth.empty() ){
         
         mSliceDataList.clear();
+		mContourPoints.clear();
         
         int i=0;
         fs::path rootPath = pth.parent_path();
@@ -93,6 +94,7 @@ void BrainGrabber::openFileDialog()
             sd.mSurface = rSurf;
             
             mSliceDataList.push_back( sd );
+			mContourPoints.push_back(vector<vec3>());
             
             ++i;
 //            ++it;
@@ -155,18 +157,28 @@ void BrainGrabber::findContours()
     // find outlines
 
     mSliceDataList[mCurSliceNum].mContourList.clear();
+	mContourPoints[mCurSliceNum].clear();
+	
+	const float Z_SCALE = 1.0f;
     
     cv::findContours(input, mContours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 //    cv::findContours(input, mContours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
     for (ContourVector::const_iterator iter = mContours.begin(); iter != mContours.end(); ++iter)
     {
         gl::VertBatchRef tVertBatch = gl::VertBatch::create(GL_LINE_LOOP);
+		
         for (vector<cv::Point>::const_iterator pt = iter->begin(); pt != iter->end(); ++pt) {
             vec2 p( fromOcv(*pt) );
+			vec2 xyPt(p - ((vec2)curSurf.getSize() * vec2(0.5)));
+			vec3 vert = vec3(xyPt, mCurSliceNum * Z_SCALE);
             
             tVertBatch->color(1,0,0);
-            tVertBatch->vertex(p - ((vec2)curSurf.getSize() * vec2(0.5)) );
+            tVertBatch->vertex( vert );
+			
+			mContourPoints[mCurSliceNum].push_back(vert);
+			
         }
+		
         tVertBatch->end();
         
         mSliceDataList[mCurSliceNum].mContourList.push_back( tVertBatch );
@@ -254,8 +266,13 @@ void BrainGrabber::draw3D()
 void BrainGrabber::exportXYZ() {
 	std::string str = "";
 	
-	for (int i = 0; i < 100; i++) {
-		str += "x, y, z\n";
+	for (int i = 0; i < mContourPoints.size(); ++i) {
+		auto points = mContourPoints[i];
+		
+		for (int j = 0; j < points.size(); ++j) {
+			vec3 pt = points[j];
+			str += to_string(pt.x) + " " + to_string(pt.y) + " " + to_string(pt.z) + "\n";
+		}
 	}
 	
 	saveToFile(str, getAppPath().string() + "/export.xyz");

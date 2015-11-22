@@ -69,6 +69,7 @@ private:
     // CONTOUR FINDER
     typedef std::vector< std::vector<cv::Point> > ContourVector;
     ContourVector   mContours;
+	std::vector<std::vector<ci::vec3>> mContourPoints;
 	
     // VIEW
     BRAIN_VIEW_MODE mCurrentViewMode;
