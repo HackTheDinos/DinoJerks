@@ -14,6 +14,7 @@
 #include "cinder/ip/Resize.h"
 #include "cinder/Camera.h"
 #include "cinder/Arcball.h"
+#include "cinder/Log.h"
 
 #include "CinderOpenCV.h"
 

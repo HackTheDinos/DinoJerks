@@ -47,6 +47,7 @@ BrainGrabber::BrainGrabber() :
     });
 	
 	mSlider = new BrainSlider(ci::Rectf(250 + 50, getWindowHeight() - 100, getWindowWidth() - 50, getWindowHeight() - 100 + 20));
+    
     reloadShader();
 }
 
@@ -72,9 +73,14 @@ void BrainGrabber::reloadShader()
     console() << "Reload Shader" << endl;
     try {
         mSkullShader = gl::GlslProg::create( loadAsset("shaders/skull/skull.vert"), loadAsset("shaders/skull/skull.frag") );
-        console() << "Shader load ok" << endl;
-    }catch( std::exception e ){
-        console() << "Error loading shader :: " << e.what() << endl;
+        
+        if( mParticleBatch ){
+            mParticleBatch->replaceGlslProg( mSkullShader );
+        }
+        
+        CI_LOG_I("Skull shader loaded ok");
+    }catch( const std::exception &e ){
+        CI_LOG_EXCEPTION( "Exception caught loading pixelation .vert / frag", e );
     }
 }
 
@@ -242,7 +248,7 @@ void BrainGrabber::pushVboPoints()
     // A VboMesh is an array of layout + vbo pairs
     auto mesh = gl::VboMesh::create( mAllPoints.size(), GL_POINTS, { { particleLayout, mParticleVbo } } );
 
-    mParticleBatch = gl::Batch::create( mesh, gl::getStockShader( gl::ShaderDef().color() ) );
+    mParticleBatch = gl::Batch::create( mesh, mSkullShader );
     gl::pointSize( 1.0f );
 }
 
