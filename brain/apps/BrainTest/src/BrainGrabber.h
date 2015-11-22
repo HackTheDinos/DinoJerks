@@ -13,6 +13,7 @@
 #include "cinder/Filesystem.h"
 #include "cinder/ip/Resize.h"
 #include "cinder/Camera.h"
+#include "cinder/Arcball.h"
 
 #include "CinderOpenCV.h"
 
@@ -28,8 +29,8 @@ public:
     
     void setup();
     void update();
-    void draw();
-    
+	void draw();
+	
     void openFileDialog();
 
 private:
@@ -45,7 +46,7 @@ private:
         std::vector< ci::vec3 >             mVertList;
         std::vector<ci::gl::VertBatchRef>   mVertBatchList;
     };
-    
+	
     void draw2D();
     void draw3D();
     
@@ -77,7 +78,8 @@ private:
     BRAIN_VIEW_MODE mCurrentViewMode;
     
     // 3D STUFF
-    ci::CameraPersp mCamera;
+	ci::Arcball			mArcball;
+	ci::CameraPersp		mCamera;
     float           mCameraZ;
     ci::gl::FboRef  mContourFbo;
     

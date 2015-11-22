@@ -27,6 +27,8 @@ public:
 	 */
 	float getPosition();
 	
+	bool isDragging();
+	
 private:
 	
 	void moveTo(float x);

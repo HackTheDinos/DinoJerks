@@ -45,6 +45,10 @@ BrainSlider::BrainSlider(ci::Rectf trackBounds) {
 void BrainSlider::update() {
 }
 
+bool BrainSlider::isDragging() {
+	return mIsDragging;
+}
+
 void BrainSlider::draw() {
 	gl::color(1, 1, 1, 0.5);
 	gl::drawSolidRect(mTrackBounds);

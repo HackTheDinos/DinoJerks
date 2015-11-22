@@ -47,12 +47,27 @@ BrainGrabber::BrainGrabber() :
     });
 	
 	mSlider = new BrainSlider(ci::Rectf(250 + 50, getWindowHeight() - 100, getWindowWidth() - 50, getWindowHeight() - 100 + 20));
+	
 }
 
 void BrainGrabber::setup()
 {
+	gl::enableDepthRead();
+	gl::enableDepthWrite();
+	
     mCamera.lookAt( vec3(0,0,mCameraZ), vec3(0), vec3(0,1,0) );
     mContourFbo = gl::Fbo::create( getWindowWidth() - 250, getWindowHeight() );
+	mArcball = Arcball( &mCamera, Sphere(vec3(0), 0.5) );
+	
+	getWindow()->getSignalMouseDown().connect([&](MouseEvent event){
+		if (!mSlider->isDragging()) {
+			mArcball.mouseDown(event);
+		}
+	});
+	
+	getWindow()->getSignalMouseDrag().connect([&](MouseEvent event){
+		mArcball.mouseDrag(event);
+	});
 }
 
 void BrainGrabber::openFileDialog()
@@ -125,7 +140,7 @@ void BrainGrabber::update()
     }
     
     // 3D ----------
-    mCamera.lookAt( vec3(0,0,mCameraZ), vec3(0), vec3(0,1,0) );
+//    mCamera.lookAt( vec3(0,0,mCameraZ), vec3(0), vec3(0,1,0) );
     mCamera.setAspectRatio( (getWindowWidth() - 250) / getWindowHeight() );
 }
 
@@ -268,14 +283,8 @@ void BrainGrabber::draw2D()
 void BrainGrabber::draw3D()
 {
     gl::pushMatrices();{
-        //        gl::ScopedFramebuffer scFbo( mContourFbo );
         gl::setMatrices( mCamera );
-        gl::rotate( getElapsedSeconds() * 0.5, vec3(0,1,0) );
-        gl::translate( vec3(0, 0, 0) );
-//        gl::setMatricesWindowPersp( mContourFbo->getSize() );
-//        gl::ScopedViewport scVp( 250, 0, getWindowWidth(), getWindowHeight() );
-
-//        gl::clear();
+		gl::rotate( mArcball.getQuat() );
 		
         for( int i=0; i<mSliceDataList.size(); i++){
             SliceData *curSlice = &mSliceDataList[i];
