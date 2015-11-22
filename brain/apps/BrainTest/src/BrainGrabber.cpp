@@ -44,9 +44,6 @@ BrainGrabber::BrainGrabber() :
         mGui->setSize( vec2(250, getWindowHeight()) );
     });
 	
-//	getWindow()->getSignalMouseUp().connect([&](MouseEvent event){
-//		saveToFile("test", getAppPath().string() + "/export.xyz");
-//	});
 	mSlider = new BrainSlider(ci::Rectf(250 + 50, getWindowHeight() - 100, getWindowWidth() - 50, getWindowHeight() - 100 + 20));
 }
 
@@ -140,13 +137,9 @@ void BrainGrabber::findContours( int slice )
     // transform the material to find the specified color
     vec3 hsvCol = rgbToHsv( mColToMatch );
     
-    // TO HSL
-    vec3 lBv = vec3( hsvCol.r, hsvCol.g, max(0.0f, hsvCol.b - mColorTolerance) );
-    vec3 uBv = vec3( hsvCol.r, hsvCol.g, min(1.0f, hsvCol.b + mColorTolerance) );
-    
-    // BACK TO RGB
-    lB = hsvToRgb( lBv );
-    uB = hsvToRgb( uBv );
+    // TO HSL, ADJUST BRIGHTNESS, BACK TO RGB
+    vec3 lB = hsvToRgb( vec3( hsvCol.r, hsvCol.g, max(0.0f, hsvCol.b - mColorTolerance) ) );
+    vec3 uB = hsvToRgb( vec3( hsvCol.r, hsvCol.g, min(1.0f, hsvCol.b + mColorTolerance) ) );
     
     cv::Scalar lowerBounds(lB.r * 255.0, lB.g * 255.0, lB.b * 255.0);
     cv::Scalar upperBounds(uB.r * 255.0, uB.g * 255.0, uB.b * 255.0);
@@ -154,14 +147,16 @@ void BrainGrabber::findContours( int slice )
     
     mDebugTex = gl::Texture::create( fromOcv(input) );
     
-    // find outlines
-
-    mSliceDataList[slice].mContourList.clear();
+    // FIND OUTLINES ----------------------------------------------------------------
+    mSliceDataList[slice].mVertBatchList.clear();
+    mSliceDataList[slice].mVertList.clear();
 	mContourPoints[slice].clear();
 	
-	const float Z_SCALE = 1.0f;
+	const float Z_SCALE = 1.0/600.0;
     
     cv::findContours(input, mContours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+    
+    // iterate through each contour and save the points
     for (ContourVector::const_iterator iter = mContours.begin(); iter != mContours.end(); ++iter)
     {
         gl::VertBatchRef tVertBatch = gl::VertBatch::create(GL_LINE_LOOP);
@@ -171,27 +166,36 @@ void BrainGrabber::findContours( int slice )
             vec2 p( (vec2)fromOcv(*pt) - hImg );
             vec2 normPt = p / (vec2)curSurf.getSize();
             
-            vec3 vert = vec3( normPt, 1.0/600.0 * curSlice->uuid);
+            vec3 vert = vec3(normPt, Z_SCALE * curSlice->uuid);
             
             tVertBatch->color(1,0,0);
             tVertBatch->vertex( vert );
 			
 			mContourPoints[slice].push_back(vert);
-			
+            mSliceDataList[slice].mVertList.push_back(vert);
         }
-		
         tVertBatch->end();
         
-        mSliceDataList[slice].mContourList.push_back( tVertBatch );
+        mSliceDataList[slice].mVertBatchList.push_back( tVertBatch );
     }
 }
 
 void BrainGrabber::recalcAll()
 {
+    mAllPoints.clear();
+    
     for( int i=0; i<mSliceDataList.size(); i++){
-        if( mSliceDataList[mCurSliceNum].bNeedsRecalc ){
+        SliceData *sd = &mSliceDataList[mCurSliceNum];
+        
+        if( sd->bNeedsRecalc ){
             findContours(i);
-            mSliceDataList[mCurSliceNum].bNeedsRecalc = false;
+            sd->bNeedsRecalc = false;
+        }
+        
+        for(int k=0; k<sd->mVertList.size(); k++){
+//            mAllPoints.color( 1,1,1 );
+//            mAllPoints.vertex( sd->mVertList[k] );
+            mAllPoints.push_back( sd->mVertList[k] );
         }
     }
 }
@@ -240,13 +244,10 @@ void BrainGrabber::draw2D()
             gl::translate( surfSize * vec2(0.5) );
             gl::scale( surfSize );
             
-            if( sd->mContourList.size() ){
-                gl::ScopedColor scCol( 1,0,1,1 );
-//                gl::draw( mContourList[mCurImageNum] );
-                
-                for( int i=0; i<sd->mContourList.size(); ++i){
-                    if( !sd->mContourList[i]->empty() ){
-                        sd->mContourList[i]->draw();
+            if( sd->mVertBatchList.size() ){
+                for( int i=0; i<sd->mVertBatchList.size(); ++i){
+                    if( !sd->mVertBatchList[i]->empty() ){
+                        sd->mVertBatchList[i]->draw();
                     }
                 }
             }
@@ -269,12 +270,15 @@ void BrainGrabber::draw3D()
         //        gl::ScopedViewport scVp( 250, 0, getWindowWidth(), getWindowHeight() );
         
         //        gl::clear();
+        
+        /*
         for( int i=0; i<mSliceDataList.size(); i++){
             SliceData *curSlice = &mSliceDataList[i];
             for( int k=0; k<curSlice->mContourList.size(); k++){
-                curSlice->mContourList[k]->draw();
+                curSlice->mVertBatchList[k]->draw();
             }
         }
+        */
         
     }gl::popMatrices();
 }

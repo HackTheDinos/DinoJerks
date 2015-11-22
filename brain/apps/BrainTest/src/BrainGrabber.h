@@ -42,7 +42,8 @@ private:
         int             uuid;
         bool            bNeedsRecalc;
         ci::Surface     mSurface;
-        std::vector<ci::gl::VertBatchRef> mContourList;
+        std::vector< ci::vec3 >             mVertList;
+        std::vector<ci::gl::VertBatchRef>   mVertBatchList;
     };
     
     void draw2D();
@@ -79,6 +80,9 @@ private:
     ci::CameraPersp mCamera;
     float           mCameraZ;
     ci::gl::FboRef  mContourFbo;
+    
+    // POINTS
+    std::vector<ci::vec3>   mAllPoints;
     
     // DEBUG
     ci::gl::TextureRef mDebugTex;
