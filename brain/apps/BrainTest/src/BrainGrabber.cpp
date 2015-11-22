@@ -30,7 +30,7 @@ BrainGrabber::BrainGrabber() :
     
     mGui->addLabel("VIEW MODE");
     mGui->addButton("2D MODE", [&](void*){ mCurrentViewMode = MODE_2D; }, this );
-    mGui->addButton("3D MODE", [&](void*){ mCurrentViewMode = MODE_3D; }, this );
+    mGui->addButton("3D MODE", [&](void*){ mCurrentViewMode = MODE_3D; recalcAll(); }, this );
     mGui->addButton("EXPORT XYZ", [&](void*){ exportXYZ(); }, this );
     
     mGui->addLabel("3D STUFF");
@@ -140,8 +140,8 @@ void BrainGrabber::findContours( int slice )
     vec3 hsvCol = rgbToHsv( mColToMatch );
     
     // TO HSL, ADJUST BRIGHTNESS, BACK TO RGB
-    vec3 lB = hsvToRgb( vec3( hsvCol.r, hsvCol.g, max(0.0f, hsvCol.b - mColorTolerance) ) );
-    vec3 uB = hsvToRgb( vec3( hsvCol.r, hsvCol.g, min(1.0f, hsvCol.b + mColorTolerance) ) );
+    lB = hsvToRgb( vec3( hsvCol.r, hsvCol.g, max(0.0f, hsvCol.b - mColorTolerance) ) );
+    uB = hsvToRgb( vec3( hsvCol.r, hsvCol.g, min(1.0f, hsvCol.b + mColorTolerance) ) );
     
     cv::Scalar lowerBounds(lB.r * 255.0, lB.g * 255.0, lB.b * 255.0);
     cv::Scalar upperBounds(uB.r * 255.0, uB.g * 255.0, uB.b * 255.0);
@@ -188,10 +188,10 @@ void BrainGrabber::recalcAll()
     for( int i=0; i<mSliceDataList.size(); i++){
         SliceData *sd = &mSliceDataList[mCurSliceNum];
         
-        if( sd->bNeedsRecalc ){
+//        if( sd->bNeedsRecalc ){
             findContours(i);
             sd->bNeedsRecalc = false;
-        }
+//        }
         
         for(int k=0; k<sd->mVertList.size(); k++){
 //            mAllPoints.color( 1,1,1 );
@@ -199,6 +199,24 @@ void BrainGrabber::recalcAll()
             mAllPoints.push_back( sd->mVertList[k] );
         }
     }
+    
+    pushVboPoints();
+}
+
+void BrainGrabber::pushVboPoints()
+{
+    mParticleVbo = gl::Vbo::create( GL_ARRAY_BUFFER, mAllPoints, GL_STATIC_DRAW );
+    
+    geom::BufferLayout particleLayout;
+    particleLayout.append( geom::Attrib::POSITION, 3, sizeof( vec3 ), 0 );
+//    particleLayout.append( geom::Attrib::COLOR, 4, sizeof( Particle ), offsetof( Particle, color ) );
+    
+    // Create mesh by pairing our particle layout with our particle Vbo.
+    // A VboMesh is an array of layout + vbo pairs
+    auto mesh = gl::VboMesh::create( mAllPoints.size(), GL_POINTS, { { particleLayout, mParticleVbo } } );
+
+    mParticleBatch = gl::Batch::create( mesh, gl::getStockShader( gl::ShaderDef().color() ) );
+    gl::pointSize( 1.0f );
 }
 
 void BrainGrabber::draw()
@@ -273,12 +291,14 @@ void BrainGrabber::draw3D()
         
         //        gl::clear();
         
-        for( int i=0; i<mSliceDataList.size(); i++){
-            SliceData *curSlice = &mSliceDataList[i];
-            for( int k=0; k<curSlice->mVertBatchList.size(); k++){
-                curSlice->mVertBatchList[k]->draw();
-            }
-        }
+//        for( int i=0; i<mSliceDataList.size(); i++){
+//            SliceData *curSlice = &mSliceDataList[i];
+//            for( int k=0; k<curSlice->mVertBatchList.size(); k++){
+//                curSlice->mVertBatchList[k]->draw();
+//            }
+//        }
+        gl::ScopedDepth scD(true);
+        mParticleBatch->draw();
         
     }gl::popMatrices();
 }

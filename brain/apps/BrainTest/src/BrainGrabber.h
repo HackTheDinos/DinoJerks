@@ -51,6 +51,7 @@ private:
     
     void findContours( int slice );
     void recalcAll();
+    void pushVboPoints();
     
     pretzel::PretzelGuiRef   mGui;
 	
@@ -80,6 +81,9 @@ private:
     ci::CameraPersp mCamera;
     float           mCameraZ;
     ci::gl::FboRef  mContourFbo;
+    
+    ci::gl::VboRef      mParticleVbo;
+    ci::gl::BatchRef    mParticleBatch;
     
     // POINTS
     std::vector<ci::vec3>   mAllPoints;
