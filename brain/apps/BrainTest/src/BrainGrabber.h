@@ -48,7 +48,7 @@ private:
     void draw2D();
     void draw3D();
 	
-    void findContours();
+    void findContours(int index);
 	
     pretzel::PretzelGuiRef   mGui;
 	

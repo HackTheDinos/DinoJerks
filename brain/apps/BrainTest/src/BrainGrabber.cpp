@@ -69,8 +69,6 @@ void BrainGrabber::openFileDialog()
         {
             fs::path pp = *it;
 			
-//			console() << "about to load: " << pp << endl;
-			
             if(pp.extension() == ".DS_Store"){
                 continue;
             }
@@ -85,25 +83,21 @@ void BrainGrabber::openFileDialog()
             // save downsampled versions
             Surface rSurf( newSize.x, newSize.y, false );
             ip::resize(sf, &rSurf);
-            
-//            mSurfList.push_back( rSurf );
-            
+			
             SliceData sd;
             sd.uuid = i;
-            sd.bNeedsRecalc = true;
             sd.mSurface = rSurf;
-            
+//			sd.bNeedsRecalc = true;
+			
             mSliceDataList.push_back( sd );
 			mContourPoints.push_back(vector<vec3>());
-            
+			
+			findContours(i);
+			
             ++i;
-//            ++it;
-//            ++it;
-            
-//            if( mSliceDataList.size() > 100){
-//                break;
-//            }
         }
+		
+		
         
     }else{
         console() << "Cancel" << endl;
@@ -124,7 +118,7 @@ void BrainGrabber::update()
     
     // If anything needs recalculating, do it now
     if( mSliceDataList.size() && mSliceDataList[mCurSliceNum].bNeedsRecalc ){
-        findContours();
+        findContours(mCurSliceNum);
         mSliceDataList[mCurSliceNum].bNeedsRecalc = false;
     }
     
@@ -132,9 +126,9 @@ void BrainGrabber::update()
     mCamera.lookAt( vec3(0,0,mCameraZ), vec3(0), vec3(0,1,0) );
 }
 
-void BrainGrabber::findContours()
+void BrainGrabber::findContours(int index)
 {
-    Surface curSurf = mSliceDataList[mCurSliceNum].mSurface;
+    Surface curSurf = mSliceDataList[index].mSurface;
     cv::Mat input = toOcv( Channel(curSurf) );
     
     // transform the material to find the specified color
@@ -156,8 +150,8 @@ void BrainGrabber::findContours()
     
     // find outlines
 
-    mSliceDataList[mCurSliceNum].mContourList.clear();
-	mContourPoints[mCurSliceNum].clear();
+    mSliceDataList[index].mContourList.clear();
+	mContourPoints[index].clear();
 	
 	const float Z_SCALE = 1.0f;
     
@@ -170,18 +164,18 @@ void BrainGrabber::findContours()
         for (vector<cv::Point>::const_iterator pt = iter->begin(); pt != iter->end(); ++pt) {
             vec2 p( fromOcv(*pt) );
 			vec2 xyPt(p - ((vec2)curSurf.getSize() * vec2(0.5)));
-			vec3 vert = vec3(xyPt, mCurSliceNum * Z_SCALE);
+			vec3 vert = vec3(xyPt, index * Z_SCALE);
             
             tVertBatch->color(1,0,0);
             tVertBatch->vertex( vert );
 			
-			mContourPoints[mCurSliceNum].push_back(vert);
+			mContourPoints[index].push_back(vert);
 			
         }
 		
         tVertBatch->end();
         
-        mSliceDataList[mCurSliceNum].mContourList.push_back( tVertBatch );
+        mSliceDataList[index].mContourList.push_back( tVertBatch );
     }
 }
 
@@ -266,13 +260,21 @@ void BrainGrabber::draw3D()
 void BrainGrabber::exportXYZ() {
 	std::string str = "";
 	
-	for (int i = 0; i < mContourPoints.size(); ++i) {
-		auto points = mContourPoints[i];
+	if (mContourPoints.size() > 0) {
 		
-		for (int j = 0; j < points.size(); ++j) {
-			vec3 pt = points[j];
-			str += to_string(pt.x) + " " + to_string(pt.y) + " " + to_string(pt.z) + "\n";
+		for (int i = 0; i < mContourPoints.size(); ++i) {
+			auto points = mContourPoints[i];
+			
+			if (points.size() <= 0) {
+				continue;
+			}
+			
+			for (int j = 0; j < points.size(); ++j) {
+				vec3 pt = points[j];
+				str += to_string(pt.x) + " " + to_string(pt.y) + " " + to_string(pt.z) + "\n";
+			}
 		}
+		
 	}
 	
 	saveToFile(str, getAppPath().string() + "/export.xyz");
