@@ -32,6 +32,7 @@ public:
 	void draw();
 	
     void openFileDialog();
+    void reloadShader();
 
 private:
     enum BRAIN_VIEW_MODE {
@@ -52,6 +53,7 @@ private:
     
     void findContours( int slice );
     void recalcAll();
+    void pushVboPoints();
     
     pretzel::PretzelGuiRef   mGui;
 	
@@ -82,6 +84,11 @@ private:
 	ci::CameraPersp		mCamera;
     float           mCameraZ;
     ci::gl::FboRef  mContourFbo;
+    
+    ci::gl::VboRef      mParticleVbo;
+    ci::gl::BatchRef    mParticleBatch;
+    
+    ci::gl::GlslProgRef mSkullShader;
     
     // POINTS
     std::vector<ci::vec3>   mAllPoints;

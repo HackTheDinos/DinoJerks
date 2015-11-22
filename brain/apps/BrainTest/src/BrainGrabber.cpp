@@ -30,7 +30,7 @@ BrainGrabber::BrainGrabber() :
     
     mGui->addLabel("VIEW MODE");
     mGui->addButton("2D MODE", [&](void*){ mCurrentViewMode = MODE_2D; }, this );
-    mGui->addButton("3D MODE", [&](void*){ mCurrentViewMode = MODE_3D; }, this );
+    mGui->addButton("3D MODE", [&](void*){ mCurrentViewMode = MODE_3D; recalcAll(); }, this );
     mGui->addButton("EXPORT XYZ", [&](void*){ exportXYZ(); }, this );
     
     mGui->addLabel("3D STUFF");
@@ -47,14 +47,11 @@ BrainGrabber::BrainGrabber() :
     });
 	
 	mSlider = new BrainSlider(ci::Rectf(250 + 50, getWindowHeight() - 100, getWindowWidth() - 50, getWindowHeight() - 100 + 20));
-	
+    reloadShader();
 }
 
 void BrainGrabber::setup()
 {
-	gl::enableDepthRead();
-	gl::enableDepthWrite();
-	
     mCamera.lookAt( vec3(0,0,mCameraZ), vec3(0), vec3(0,1,0) );
     mContourFbo = gl::Fbo::create( getWindowWidth() - 250, getWindowHeight() );
 	mArcball = Arcball( &mCamera, Sphere(vec3(0), 1) );
@@ -68,6 +65,17 @@ void BrainGrabber::setup()
 	getWindow()->getSignalMouseDrag().connect([&](MouseEvent event){
 		mArcball.mouseDrag(event);
 	});
+}
+
+void BrainGrabber::reloadShader()
+{
+    console() << "Reload Shader" << endl;
+    try {
+        mSkullShader = gl::GlslProg::create( loadAsset("shaders/skull/skull.vert"), loadAsset("shaders/skull/skull.frag") );
+        console() << "Shader load ok" << endl;
+    }catch( std::exception e ){
+        console() << "Error loading shader :: " << e.what() << endl;
+    }
 }
 
 void BrainGrabber::openFileDialog()
@@ -111,9 +119,9 @@ void BrainGrabber::openFileDialog()
 			
             ++i;
             
-            if( mSliceDataList.size() > 550){
-                break;
-            }
+//            if( mSliceDataList.size() > 550){
+//                break;
+//            }
         }
         
     }else{
@@ -155,8 +163,8 @@ void BrainGrabber::findContours( int slice )
     vec3 hsvCol = rgbToHsv( mColToMatch );
     
     // TO HSL, ADJUST BRIGHTNESS, BACK TO RGB
-    vec3 lB = hsvToRgb( vec3( hsvCol.r, hsvCol.g, max(0.0f, hsvCol.b - mColorTolerance) ) );
-    vec3 uB = hsvToRgb( vec3( hsvCol.r, hsvCol.g, min(1.0f, hsvCol.b + mColorTolerance) ) );
+    lB = hsvToRgb( vec3( hsvCol.r, hsvCol.g, max(0.0f, hsvCol.b - mColorTolerance) ) );
+    uB = hsvToRgb( vec3( hsvCol.r, hsvCol.g, min(1.0f, hsvCol.b + mColorTolerance) ) );
     
     cv::Scalar lowerBounds(lB.r * 255.0, lB.g * 255.0, lB.b * 255.0);
     cv::Scalar upperBounds(uB.r * 255.0, uB.g * 255.0, uB.b * 255.0);
@@ -236,7 +244,7 @@ void BrainGrabber::recalcAll()
     mAllPoints.clear();
     
     for( int i=0; i<mSliceDataList.size(); i++){
-        SliceData *sd = &mSliceDataList[mCurSliceNum];
+        SliceData *sd = &mSliceDataList[i];
         
         if( sd->bNeedsRecalc ){
             findContours(i);
@@ -249,6 +257,24 @@ void BrainGrabber::recalcAll()
             mAllPoints.push_back( sd->mVertList[k] );
         }
     }
+    
+    pushVboPoints();
+}
+
+void BrainGrabber::pushVboPoints()
+{
+    mParticleVbo = gl::Vbo::create( GL_ARRAY_BUFFER, mAllPoints, GL_STATIC_DRAW );
+    
+    geom::BufferLayout particleLayout;
+    particleLayout.append( geom::Attrib::POSITION, 3, sizeof( vec3 ), 0 );
+//    particleLayout.append( geom::Attrib::COLOR, 4, sizeof( Particle ), offsetof( Particle, color ) );
+    
+    // Create mesh by pairing our particle layout with our particle Vbo.
+    // A VboMesh is an array of layout + vbo pairs
+    auto mesh = gl::VboMesh::create( mAllPoints.size(), GL_POINTS, { { particleLayout, mParticleVbo } } );
+
+    mParticleBatch = gl::Batch::create( mesh, gl::getStockShader( gl::ShaderDef().color() ) );
+    gl::pointSize( 1.0f );
 }
 
 void BrainGrabber::draw()
@@ -315,19 +341,29 @@ void BrainGrabber::draw3D()
 {
     gl::pushMatrices();{
         gl::setMatrices( mCamera );
+        //        gl::setMatricesWindowPersp( mContourFbo->getSize() );
+        //        gl::ScopedViewport scVp( 250, 0, getWindowWidth(), getWindowHeight() );
+        
+        //        gl::clear();
+        
+        gl::ScopedDepth scD(true);
 		gl::rotate( mArcball.getQuat() );
-		
-        for( int i=0; i<mSliceDataList.size(); i++){
-            SliceData *curSlice = &mSliceDataList[i];
-            for( int k=0; k<curSlice->mVertBatchList.size(); k++){
-                curSlice->mVertBatchList[k]->draw();
-            }
+        
+        if( mParticleBatch ){
+            mParticleBatch->draw();
         }
+//        for( int i=0; i<mSliceDataList.size(); i++){
+//            SliceData *curSlice = &mSliceDataList[i];
+//            for( int k=0; k<curSlice->mVertBatchList.size(); k++){
+//                curSlice->mVertBatchList[k]->draw();
+//            }
+//        }
         
     }gl::popMatrices();
 }
 
-void BrainGrabber::exportXYZ() {
+void BrainGrabber::exportXYZ()
+{
     std::string str = "";
     
     if (mContourPoints.size() > 0) {
