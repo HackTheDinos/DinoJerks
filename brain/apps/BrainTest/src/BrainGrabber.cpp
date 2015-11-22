@@ -60,13 +60,15 @@ void BrainGrabber::setup()
 	mArcball = Arcball( &mCamera, Sphere(vec3(0), 0.75) );
 	
 	getWindow()->getSignalMouseDown().connect([&](MouseEvent event){
-		if (!mSlider->isDragging()) {
+		if (!mSlider->isDragging() && !mGui->getBounds().contains(event.getPos()) ) {
 			mArcball.mouseDown(event);
 		}
 	});
 	
 	getWindow()->getSignalMouseDrag().connect([&](MouseEvent event){
-		mArcball.mouseDrag(event);
+        if (!mSlider->isDragging() && !mGui->getBounds().contains(event.getPos()) ) {
+            mArcball.mouseDrag(event);
+        }
 	});
 }
 
@@ -126,10 +128,6 @@ void BrainGrabber::openFileDialog()
 			findContours(i);
 			
 			++i;
-			
-			//            if( mSliceDataList.size() > 550){
-			//                break;
-			//            }
 		}
 		
 	}else{
@@ -197,14 +195,13 @@ void BrainGrabber::findContours( int slice )
 		
 		for (vector<cv::Point>::const_iterator pt = iter->begin(); pt != iter->end(); ++pt) {
 			
-			//            vec2 hImg = (vec2)curSurf.getSize() * vec2(0.5);
-			vec2 p( (vec2)fromOcv(*pt) /*-hImg*/);
+			vec2 p( fromOcv(*pt) );
 			p *= scale;
 			
 			vec3 vert = vec3(p, z);
 			vert.x -= 0.5;
 			
-			tVertBatch->color(vert.x + 0.5, vert.y + 0.5, vert.z + 0.5);
+            tVertBatch->color( 1,0,0 );
 			tVertBatch->vertex( vert );
 			
 			mContourPoints[slice].push_back(vert);
@@ -281,9 +278,11 @@ void BrainGrabber::draw2D()
 		vec2 surfSize = sd->mSurface.getSize();
 		
 		gl::pushMatrices();{
+            float scsc = fminf(1.0f / mSliceDataList.size(), fminf(1.0f / surfSize.x, 1.0 / surfSize.y));
+            
 			gl::translate( vec2(250, 0) );
-			gl::translate( surfSize * vec2(0.5) );
-			gl::scale( surfSize );
+			gl::translate( surfSize.x * 0.5, 0 );
+			gl::scale( vec2(1.0 / scsc) );
 			
 			if( sd->mVertBatchList.size() ){
 				for( int i=0; i<sd->mVertBatchList.size(); ++i){
