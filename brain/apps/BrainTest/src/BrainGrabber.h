@@ -44,12 +44,13 @@ private:
         ci::Surface     mSurface;
         std::vector<ci::gl::VertBatchRef> mContourList;
     };
-	
+    
     void draw2D();
     void draw3D();
-	
-    void findContours(int index);
-	
+    
+    void findContours( int slice );
+    void recalcAll();
+    
     pretzel::PretzelGuiRef   mGui;
 	
     std::vector<SliceData>  mSliceDataList;
@@ -77,6 +78,7 @@ private:
     // 3D STUFF
     ci::CameraPersp mCamera;
     float           mCameraZ;
+    ci::gl::FboRef  mContourFbo;
     
     // DEBUG
     ci::gl::TextureRef mDebugTex;
