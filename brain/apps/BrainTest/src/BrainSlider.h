@@ -29,6 +29,8 @@ public:
 	
 private:
 	
+	void moveTo(float x);
+	
 	ci::Rectf mTrackBounds;
 	ci::Rectf mKnobBounds;
 	
