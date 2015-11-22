@@ -46,7 +46,9 @@ mCameraZ(3)
 		mGui->setSize( vec2(250, getWindowHeight()) );
 	});
 	
-	mSlider = new BrainSlider(ci::Rectf(250 + 50, getWindowHeight() - 100, getWindowWidth() - 50, getWindowHeight() - 100 + 20));
+	float padding = 50;
+	float h = 20;
+	mSlider = new BrainSlider(ci::Rectf(250 + padding, getWindowHeight() - padding - h, getWindowWidth() - padding, getWindowHeight() - padding));
 	
 	reloadShader();
 }
@@ -154,7 +156,7 @@ void BrainGrabber::update()
 	}
 	
 	// 3D ----------
-	//    mCamera.lookAt( vec3(0,0,mCameraZ), vec3(0), vec3(0,1,0) );
+	mCamera.lookAt( vec3(0,0,mCameraZ), vec3(0), vec3(0,1,0) );
 	mCamera.setAspectRatio( (getWindowWidth() - 250) / getWindowHeight() );
 }
 
@@ -309,7 +311,9 @@ void BrainGrabber::draw2D()
 	pretzel::PretzelGui::drawAll();
 	mSlider->draw();
 	
-	gl::drawString("Current Slice: " + to_string(mCurSliceNum) + " / " + to_string(mSliceDataList.size()), vec2(300, getWindowHeight() - 70));
+	if (mSliceDataList.size() > 0) {
+		gl::drawString("Current Slice: " + to_string(mCurSliceNum + 1) + " / " + to_string(mSliceDataList.size()), vec2(300, getWindowHeight() - 35));
+	}
 }
 
 void BrainGrabber::draw3D()
