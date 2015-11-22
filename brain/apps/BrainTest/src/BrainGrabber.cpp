@@ -10,6 +10,8 @@
 
 #include <fstream>
 
+#define Z_SCALE (1.0/600.0)
+
 using namespace ci;
 using namespace ci::app;
 using namespace std;
@@ -151,8 +153,6 @@ void BrainGrabber::findContours( int slice )
     mSliceDataList[slice].mVertBatchList.clear();
     mSliceDataList[slice].mVertList.clear();
 	mContourPoints[slice].clear();
-	
-	const float Z_SCALE = 1.0/600.0;
     
     cv::findContours(input, mContours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
     
@@ -162,13 +162,14 @@ void BrainGrabber::findContours( int slice )
         gl::VertBatchRef tVertBatch = gl::VertBatch::create(GL_LINE_LOOP);
 		
         for (vector<cv::Point>::const_iterator pt = iter->begin(); pt != iter->end(); ++pt) {
+
             vec2 hImg = (vec2)curSurf.getSize() * vec2(0.5);
             vec2 p( (vec2)fromOcv(*pt) - hImg );
             vec2 normPt = p / (vec2)curSurf.getSize();
             
             vec3 vert = vec3(normPt, Z_SCALE * curSlice->uuid);
             
-            tVertBatch->color(1,0,0);
+            tVertBatch->color(vert.x + 0.5, vert.y + 0.5, (float)slice / (float)mSliceDataList.size());
             tVertBatch->vertex( vert );
 			
 			mContourPoints[slice].push_back(vert);
@@ -266,19 +267,18 @@ void BrainGrabber::draw3D()
         //        gl::ScopedFramebuffer scFbo( mContourFbo );
         gl::setMatrices( mCamera );
         gl::rotate( getElapsedSeconds() * 0.5, vec3(0,1,0) );
+        gl::translate( vec3(0,0,mSliceDataList.size() * -0.5 * Z_SCALE) );
         //        gl::setMatricesWindowPersp( mContourFbo->getSize() );
         //        gl::ScopedViewport scVp( 250, 0, getWindowWidth(), getWindowHeight() );
         
         //        gl::clear();
         
-        /*
         for( int i=0; i<mSliceDataList.size(); i++){
             SliceData *curSlice = &mSliceDataList[i];
-            for( int k=0; k<curSlice->mContourList.size(); k++){
+            for( int k=0; k<curSlice->mVertBatchList.size(); k++){
                 curSlice->mVertBatchList[k]->draw();
             }
         }
-        */
         
     }gl::popMatrices();
 }
