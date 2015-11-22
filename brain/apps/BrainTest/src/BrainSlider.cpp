@@ -22,6 +22,11 @@ BrainSlider::BrainSlider(ci::Rectf trackBounds) {
 	
 	ci::app::getWindow()->getSignalMouseDown().connect([&](MouseEvent event) {
 		mIsDragging = mKnobBounds.contains(event.getPos());
+		
+		// tap on track
+		if (!mIsDragging && mTrackBounds.contains(event.getPos())) {
+			moveTo(event.getX());
+		}
 	});
 	
 	ci::app::getWindow()->getSignalMouseDrag().connect([&](MouseEvent event) {
@@ -29,15 +34,7 @@ BrainSlider::BrainSlider(ci::Rectf trackBounds) {
 			return;
 		}
 		
-		float mouseX = event.getX();
-		float knobWidthHalf = mKnobBounds.getWidth() * 0.5f;
-		float knobCenterX = mouseX;
-		
-		knobCenterX = fmaxf(knobCenterX, mTrackBounds.x1 + knobWidthHalf);
-		knobCenterX = fminf(knobCenterX, mTrackBounds.x2 - knobWidthHalf);
-		
-		mKnobBounds.x1 = knobCenterX - knobWidthHalf;
-		mKnobBounds.x2 = knobCenterX + knobWidthHalf;
+		moveTo(event.getX());
 	});
 	
 	ci::app::getWindow()->getSignalMouseUp().connect([&](MouseEvent event) {
@@ -54,6 +51,15 @@ void BrainSlider::draw() {
 	
 	gl::color(1, 0, 0, 0.5);
 	gl::drawSolidRect(mKnobBounds);
+}
+
+void BrainSlider::moveTo(float x) {
+	float knobWidthHalf = mKnobBounds.getWidth() * 0.5f;
+	
+	x = glm::clamp(x, mTrackBounds.x1 + knobWidthHalf, mTrackBounds.x2 - knobWidthHalf);
+	
+	mKnobBounds.x1 = x - knobWidthHalf;
+	mKnobBounds.x2 = x + knobWidthHalf;
 }
 
 float BrainSlider::getPosition() {
