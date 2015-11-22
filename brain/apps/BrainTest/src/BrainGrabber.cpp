@@ -58,13 +58,15 @@ void BrainGrabber::setup()
 	mArcball = Arcball( &mCamera, Sphere(vec3(0), 0.75) );
 	
 	getWindow()->getSignalMouseDown().connect([&](MouseEvent event){
-		if (!mSlider->isDragging()) {
+		if (!mSlider->isDragging() && !mGui->getBounds().contains(event.getPos()) ) {
 			mArcball.mouseDown(event);
 		}
 	});
 	
 	getWindow()->getSignalMouseDrag().connect([&](MouseEvent event){
-		mArcball.mouseDrag(event);
+        if (!mSlider->isDragging() && !mGui->getBounds().contains(event.getPos()) ) {
+            mArcball.mouseDrag(event);
+        }
 	});
 }
 
