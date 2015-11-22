@@ -11,6 +11,7 @@
 #include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Filesystem.h"
+#include "cinder/ip/Resize.h"
 
 #include "CinderOpenCV.h"
 
@@ -19,8 +20,6 @@
 class BrainGrabber
 {
     
-
-    
 public:
     BrainGrabber();
     
@@ -28,21 +27,31 @@ public:
     void update();
     void draw();
     
+    void openFileDialog();
+    
     pretzel::PretzelGuiRef   mGui;
 
 private:
-    void findContour( ci::Surface tex );
+    void findContours( ci::Surface tex );
     
+    // ALL LOADED IMAGES
     std::vector<ci::Surface> mSurfList;
+  
+    int mCurImageNum;
     
+    // COLOR CORRECTION
     ci::Color   mColToMatch;
     float       mColorTolerance;
-    
     ci::Color   lB, uB;
+    bool        bRegenContours;
     
+    // CONTOUR FINDER
     typedef std::vector< std::vector<cv::Point> > ContourVector;
     ContourVector   mContours;
     std::vector< std::vector<ci::vec2> > mContourList;
     
+    ci::gl::VertBatchRef   mVerts;
+    
+    // DEBUG
     ci::gl::TextureRef mDebugTex;
 };
