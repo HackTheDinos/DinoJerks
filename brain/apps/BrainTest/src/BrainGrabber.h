@@ -12,6 +12,7 @@
 #include "cinder/gl/gl.h"
 #include "cinder/Filesystem.h"
 #include "cinder/ip/Resize.h"
+#include "cinder/Camera.h"
 
 #include "CinderOpenCV.h"
 
@@ -71,7 +72,11 @@ private:
 	
     // VIEW
     BRAIN_VIEW_MODE mCurrentViewMode;
-	
+    
+    // 3D STUFF
+    ci::CameraPersp mCamera;
+    float           mCameraZ;
+    
     // DEBUG
     ci::gl::TextureRef mDebugTex;
 	

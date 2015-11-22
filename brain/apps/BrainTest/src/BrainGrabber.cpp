@@ -18,17 +18,23 @@ BrainGrabber::BrainGrabber() :
     mColorTolerance(0.01),
     mColToMatch(1,1,1),
     mCurSliceNum(0),
-    mCurrentViewMode( BRAIN_VIEW_MODE::MODE_2D )
+    mCurrentViewMode( BRAIN_VIEW_MODE::MODE_2D ),
+    mCameraZ(500)
 {
     mGui = pretzel::PretzelGui::create("SETTINGS");
     mGui->addButton("OPEN FILES", [&](void*){ openFileDialog(); }, this );
     mGui->addColorPicker("Brain Color", &mColToMatch);
     mGui->addSlider("Tolerance", &mColorTolerance, 0.0, 0.5);
+    
     mGui->addLabel("VIEW MODE");
     mGui->addButton("2D MODE", [&](void*){ mCurrentViewMode = MODE_2D; }, this );
     mGui->addButton("3D MODE", [&](void*){ mCurrentViewMode = MODE_3D; }, this );
     mGui->addButton("EXPORT XYZ", [&](void*){ exportXYZ(); }, this );
-	mGui->addLabel("SAVE / LOAD SETTINGS");
+    
+    mGui->addLabel("3D STUFF");
+    mGui->addSlider("Camera Z", &mCameraZ, 0, 700);
+    
+    mGui->addLabel("SAVE / LOAD SETTINGS");
     mGui->addSaveLoad();
     
     mGui->loadSettings();
@@ -46,6 +52,7 @@ BrainGrabber::BrainGrabber() :
 
 void BrainGrabber::setup()
 {
+    mCamera.lookAt( vec3(0,0,mCameraZ), vec3(0), vec3(0,1,0) );
 }
 
 void BrainGrabber::openFileDialog()
@@ -90,6 +97,10 @@ void BrainGrabber::openFileDialog()
             ++i;
 //            ++it;
 //            ++it;
+            
+//            if( mSliceDataList.size() > 100){
+//                break;
+//            }
         }
         
     }else{
@@ -114,6 +125,9 @@ void BrainGrabber::update()
         findContours();
         mSliceDataList[mCurSliceNum].bNeedsRecalc = false;
     }
+    
+    // 3D ----------
+    mCamera.lookAt( vec3(0,0,mCameraZ), vec3(0), vec3(0,1,0) );
 }
 
 void BrainGrabber::findContours()
@@ -142,7 +156,8 @@ void BrainGrabber::findContours()
 
     mSliceDataList[mCurSliceNum].mContourList.clear();
     
-    cv::findContours(input, mContours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+    cv::findContours(input, mContours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+//    cv::findContours(input, mContours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
     for (ContourVector::const_iterator iter = mContours.begin(); iter != mContours.end(); ++iter)
     {
         gl::VertBatchRef tVertBatch = gl::VertBatch::create(GL_LINE_LOOP);
@@ -150,7 +165,7 @@ void BrainGrabber::findContours()
             vec2 p( fromOcv(*pt) );
             
             tVertBatch->color(1,0,0);
-            tVertBatch->vertex(p);
+            tVertBatch->vertex(p - ((vec2)curSurf.getSize() * vec2(0.5)) );
         }
         tVertBatch->end();
         
@@ -198,6 +213,7 @@ void BrainGrabber::draw2D()
         
         gl::pushMatrices();{
             gl::translate( vec2(250, 0) );
+            gl::translate( (vec2)sd.mSurface.getSize() * (vec2)0.5 );
             
             if( sd.mContourList.size() ){
                 gl::ScopedColor scCol( 1,0,1,1 );
@@ -222,7 +238,17 @@ void BrainGrabber::draw2D()
 
 void BrainGrabber::draw3D()
 {
-    
+	gl::pushMatrices();{
+		
+		gl::setMatrices( mCamera );
+		
+		for( int i=0; i<mSliceDataList.size(); i++){
+			for( int k=0; k<mSliceDataList[i].mContourList.size(); k++){
+				mSliceDataList[i].mContourList[k]->draw();
+			}
+		}
+		
+	}gl::popMatrices();
 }
 
 void BrainGrabber::exportXYZ() {
@@ -240,3 +266,5 @@ void BrainGrabber::saveToFile(const string text, const string location) {
 	oStream << text;
 	oStream.close();
 }
+
+
