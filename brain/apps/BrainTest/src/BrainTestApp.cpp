@@ -28,6 +28,9 @@ void BrainTestApp::keyDown( KeyEvent event )
     if( event.getChar() == 'o' && event.isAccelDown() ){
         mBrain.openFileDialog();
     }
+    else if( event.getChar() == 'r' && event.isAccelDown() ){
+        mBrain.reloadShader();
+    }
 }
 
 void BrainTestApp::update()

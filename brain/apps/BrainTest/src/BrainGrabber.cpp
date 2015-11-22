@@ -10,7 +10,7 @@
 
 #include <fstream>
 
-#define Z_SCALE (1.0/600.0)
+#define SCALE (1.0/600.0)
 
 using namespace ci;
 using namespace ci::app;
@@ -47,12 +47,35 @@ BrainGrabber::BrainGrabber() :
     });
 	
 	mSlider = new BrainSlider(ci::Rectf(250 + 50, getWindowHeight() - 100, getWindowWidth() - 50, getWindowHeight() - 100 + 20));
+    reloadShader();
 }
 
 void BrainGrabber::setup()
 {
     mCamera.lookAt( vec3(0,0,mCameraZ), vec3(0), vec3(0,1,0) );
     mContourFbo = gl::Fbo::create( getWindowWidth() - 250, getWindowHeight() );
+	mArcball = Arcball( &mCamera, Sphere(vec3(0), 0.5) );
+	
+	getWindow()->getSignalMouseDown().connect([&](MouseEvent event){
+		if (!mSlider->isDragging()) {
+			mArcball.mouseDown(event);
+		}
+	});
+	
+	getWindow()->getSignalMouseDrag().connect([&](MouseEvent event){
+		mArcball.mouseDrag(event);
+	});
+}
+
+void BrainGrabber::reloadShader()
+{
+    console() << "Reload Shader" << endl;
+    try {
+        mSkullShader = gl::GlslProg::create( loadAsset("shaders/skull/skull.vert"), loadAsset("shaders/skull/skull.frag") );
+        console() << "Shader load ok" << endl;
+    }catch( std::exception e ){
+        console() << "Error loading shader :: " << e.what() << endl;
+    }
 }
 
 void BrainGrabber::openFileDialog()
@@ -96,9 +119,9 @@ void BrainGrabber::openFileDialog()
 			
             ++i;
             
-            if( mSliceDataList.size() > 550){
-                break;
-            }
+//            if( mSliceDataList.size() > 550){
+//                break;
+//            }
         }
         
     }else{
@@ -125,7 +148,7 @@ void BrainGrabber::update()
     }
     
     // 3D ----------
-    mCamera.lookAt( vec3(0,0,mCameraZ), vec3(0), vec3(0,1,0) );
+//    mCamera.lookAt( vec3(0,0,mCameraZ), vec3(0), vec3(0,1,0) );
     mCamera.setAspectRatio( (getWindowWidth() - 250) / getWindowHeight() );
 }
 
@@ -155,6 +178,9 @@ void BrainGrabber::findContours( int slice )
 	mContourPoints[slice].clear();
     
     cv::findContours(input, mContours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+	
+	float scale = fminf(1.0f / mSliceDataList.size(), fminf(1.0f / curSurf.getWidth(), 1.0 / curSurf.getHeight()));
+	float z = (float)slice * scale;
     
     // iterate through each contour and save the points
     for (ContourVector::const_iterator iter = mContours.begin(); iter != mContours.end(); ++iter)
@@ -163,13 +189,14 @@ void BrainGrabber::findContours( int slice )
 		
         for (vector<cv::Point>::const_iterator pt = iter->begin(); pt != iter->end(); ++pt) {
 
-            vec2 hImg = (vec2)curSurf.getSize() * vec2(0.5);
-            vec2 p( (vec2)fromOcv(*pt) - hImg );
-            vec2 normPt = p / (vec2)curSurf.getSize();
-            
-            vec3 vert = vec3(normPt, Z_SCALE * curSlice->uuid);
-            
-            tVertBatch->color(vert.x + 0.5, vert.y + 0.5, (float)slice / (float)mSliceDataList.size());
+//            vec2 hImg = (vec2)curSurf.getSize() * vec2(0.5);
+            vec2 p( (vec2)fromOcv(*pt) /*-hImg*/);
+			p *= scale;
+			
+            vec3 vert = vec3(p, z);
+			vert.x -= 0.5;
+			
+            tVertBatch->color(vert.x + 0.5, vert.y + 0.5, vert.z + 0.5);
             tVertBatch->vertex( vert );
 			
 			mContourPoints[slice].push_back(vert);
@@ -186,12 +213,12 @@ void BrainGrabber::recalcAll()
     mAllPoints.clear();
     
     for( int i=0; i<mSliceDataList.size(); i++){
-        SliceData *sd = &mSliceDataList[mCurSliceNum];
+        SliceData *sd = &mSliceDataList[i];
         
-//        if( sd->bNeedsRecalc ){
+        if( sd->bNeedsRecalc ){
             findContours(i);
             sd->bNeedsRecalc = false;
-//        }
+        }
         
         for(int k=0; k<sd->mVertList.size(); k++){
 //            mAllPoints.color( 1,1,1 );
@@ -282,28 +309,30 @@ void BrainGrabber::draw2D()
 void BrainGrabber::draw3D()
 {
     gl::pushMatrices();{
-        //        gl::ScopedFramebuffer scFbo( mContourFbo );
         gl::setMatrices( mCamera );
-        gl::rotate( getElapsedSeconds() * 0.5, vec3(0,1,0) );
-        gl::translate( vec3(0,0,mSliceDataList.size() * -0.5 * Z_SCALE) );
         //        gl::setMatricesWindowPersp( mContourFbo->getSize() );
         //        gl::ScopedViewport scVp( 250, 0, getWindowWidth(), getWindowHeight() );
         
         //        gl::clear();
         
+        gl::ScopedDepth scD(true);
+		gl::rotate( mArcball.getQuat() );
+        
+        if( mParticleBatch ){
+            mParticleBatch->draw();
+        }
 //        for( int i=0; i<mSliceDataList.size(); i++){
 //            SliceData *curSlice = &mSliceDataList[i];
 //            for( int k=0; k<curSlice->mVertBatchList.size(); k++){
 //                curSlice->mVertBatchList[k]->draw();
 //            }
 //        }
-        gl::ScopedDepth scD(true);
-        mParticleBatch->draw();
         
     }gl::popMatrices();
 }
 
-void BrainGrabber::exportXYZ() {
+void BrainGrabber::exportXYZ()
+{
     std::string str = "";
     
     if (mContourPoints.size() > 0) {
