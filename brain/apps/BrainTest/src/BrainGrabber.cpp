@@ -20,7 +20,7 @@ BrainGrabber::BrainGrabber() :
     mColorTolerance(0.01),
     mColToMatch(1,1,1),
     mCurSliceNum(0),
-    mCurrentViewMode( BRAIN_VIEW_MODE::MODE_2D ),
+    mCurrentViewMode( BRAIN_VIEW_MODE::MODE_3D ),
     mCameraZ(3)
 {
     mGui = pretzel::PretzelGui::create("SETTINGS");
@@ -157,7 +157,7 @@ void BrainGrabber::findContours( int slice )
     cv::findContours(input, mContours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 	
 	float scale = fminf(1.0f / mSliceDataList.size(), fminf(1.0f / curSurf.getWidth(), 1.0 / curSurf.getHeight()));
-	float z = (float)slice * scale - 0.5;
+	float z = (float)slice * scale;
     
     // iterate through each contour and save the points
     for (ContourVector::const_iterator iter = mContours.begin(); iter != mContours.end(); ++iter)
@@ -166,14 +166,14 @@ void BrainGrabber::findContours( int slice )
 		
         for (vector<cv::Point>::const_iterator pt = iter->begin(); pt != iter->end(); ++pt) {
 
-            vec2 hImg = (vec2)curSurf.getSize() * vec2(0.5);
-            vec2 p( (vec2)fromOcv(*pt) - hImg );
-			p.x *= scale;
-			p.y *= scale;
+//            vec2 hImg = (vec2)curSurf.getSize() * vec2(0.5);
+            vec2 p( (vec2)fromOcv(*pt) /*-hImg*/);
+			p *= scale;
 			
             vec3 vert = vec3(p, z);
-            
-            tVertBatch->color(p.x + 0.5, p.y + 0.5, vert.z + 0.5);
+			vert.x -= 0.5;
+			
+            tVertBatch->color(vert.x + 0.5, vert.y + 0.5, vert.z + 0.5);
             tVertBatch->vertex( vert );
 			
 			mContourPoints[slice].push_back(vert);
