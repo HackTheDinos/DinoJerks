@@ -157,6 +157,7 @@ void BrainGrabber::findContours( int slice )
     cv::findContours(input, mContours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 	
 	float scale = fminf(1.0f / mSliceDataList.size(), fminf(1.0f / curSurf.getWidth(), 1.0 / curSurf.getHeight()));
+	float z = (float)slice * scale - 0.5;
     
     // iterate through each contour and save the points
     for (ContourVector::const_iterator iter = mContours.begin(); iter != mContours.end(); ++iter)
@@ -170,7 +171,7 @@ void BrainGrabber::findContours( int slice )
 			p.x *= scale;
 			p.y *= scale;
 			
-            vec3 vert = vec3(p, (float)slice * scale - 0.5);
+            vec3 vert = vec3(p, z);
             
             tVertBatch->color(p.x + 0.5, p.y + 0.5, vert.z + 0.5);
             tVertBatch->vertex( vert );
@@ -270,12 +271,12 @@ void BrainGrabber::draw3D()
         //        gl::ScopedFramebuffer scFbo( mContourFbo );
         gl::setMatrices( mCamera );
         gl::rotate( getElapsedSeconds() * 0.5, vec3(0,1,0) );
-        gl::translate( vec3(0,0,mSliceDataList.size() * -0.5 * SCALE) );
-        //        gl::setMatricesWindowPersp( mContourFbo->getSize() );
-        //        gl::ScopedViewport scVp( 250, 0, getWindowWidth(), getWindowHeight() );
-        
-        //        gl::clear();
-        
+        gl::translate( vec3(0, 0, 0) );
+//        gl::setMatricesWindowPersp( mContourFbo->getSize() );
+//        gl::ScopedViewport scVp( 250, 0, getWindowWidth(), getWindowHeight() );
+
+//        gl::clear();
+		
         for( int i=0; i<mSliceDataList.size(); i++){
             SliceData *curSlice = &mSliceDataList[i];
             for( int k=0; k<curSlice->mVertBatchList.size(); k++){
