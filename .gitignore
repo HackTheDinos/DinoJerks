@@ -30,6 +30,7 @@ build/*.build
 
 # Cinder Stuff
 Cinder/
+BrainBuster/blocks/OpenCV/
 
 # OSX
 .DS_Store

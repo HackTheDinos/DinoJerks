@@ -8,7 +8,7 @@ This compiles to an executable application for OSX 10.8 and up.
 
 Written with [Cinder 0.9.0](https://libcinder.org/)
 
-## Links:
+## Links
 
 * [Presentation](https://docs.google.com/presentation/d/1G-WagRxOPHW9aEhLG6annv1y-Zyt1DyZmsQQMLqao1w/edit?usp=sharing)
 * [Screen Recording](https://www.youtube.com/watch?v=hDsgIgJ7ETI)
