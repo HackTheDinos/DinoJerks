@@ -36,7 +36,7 @@ cd DinoJerks
 git submodule update --init --recursive
 
 # Build Cinder (this will take a while)
-(cd Cinder/xcode; fullbuild.sh)
+(cd Cinder/xcode; ./fullbuild.sh)
 
 # Open the app project in Xcode
 open BrainBuster/xcode/BrainTest.xcodeproj
