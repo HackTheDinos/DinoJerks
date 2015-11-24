@@ -38,8 +38,8 @@ git submodule update --init --recursive
 # Build Cinder (this will take a while)
 (cd Cinder/xcode; fullbuild.sh)
 
-# Open the project in Xcode
-open Cinder/xcode/cinder.xcodeproj
+# Open the app project in Xcode
+open BrainBuster/xcode/BrainTest.xcodeproj
 
 # Now hit 'Run' (CMD+R) in Xcode
 ```
