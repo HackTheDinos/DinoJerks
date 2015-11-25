@@ -56,5 +56,10 @@ open BrainBuster/xcode/BrainTest.xcodeproj
 
 ## Next Steps
 
+We could use help with any of the following:
+
 * Allow adjustment of resolution per slice
 * Ensure that 3D point clouds are centered
+* Create 3D mesh and stl file from our program
+* Noise filters for older fossils with noisy sediment
+* Speed and optimization
