@@ -6,6 +6,8 @@ It takes in CT scan slices and outputs a mesh cloud based on a selected bone den
 
 This compiles to an executable application for OSX 10.8 and up.
 
+Pre-compiled executables can be found under [Releases](https://github.com/HackTheDinos/DinoJerks/releases).
+
 Written with [Cinder 0.9.0](https://libcinder.org/)
 
 ## Links
@@ -14,6 +16,14 @@ Written with [Cinder 0.9.0](https://libcinder.org/)
 * [Screen Recording](https://www.youtube.com/watch?v=hDsgIgJ7ETI)
 * [Build A Brain Challenge](https://github.com/amnh/HacktheDinos/wiki/Build-A-Brain)
 * [Cinder](https://libcinder.org/)
+
+## Using the App
+
+Once compiled and running, the app can load any sequence of 8-bit TIF, PNG or JPG images. Press `CMD + O` to open a file dialog and select the first image of your sequence. This will load the image in 2D mode.
+
+*Sample data from Stanford University can be downloaded [here](https://graphics.stanford.edu/data/voldata/) (e.g. [8-bit TIFs of human skull](https://graphics.stanford.edu/data/voldata/cthead-8bit.tar.gz))*
+
+Use the slider at the bottom to browse through the individual CT slices. Use the menu on the left to switch to `3D Mode`.
 
 ## Development
 
@@ -43,14 +53,6 @@ open BrainBuster/xcode/BrainTest.xcodeproj
 
 # Now hit 'Run' (CMD+R) in Xcode
 ```
-
-## Using the App
-
-Once compiled and running, the app can load any sequence of 8-bit TIF, PNG or JPG images. Press `CMD + O` to open a file dialog and select the first image of your sequence. This will load the image in 2D mode.
-
-*Sample data from Stanford University can be downloaded [here](https://graphics.stanford.edu/data/voldata/) (e.g. [8-bit TIFs of human skull](https://graphics.stanford.edu/data/voldata/cthead-8bit.tar.gz))*
-
-Use the slider at the bottom to browse through the individual CT slices. Use the menu on the left to switch to `3D Mode`.
 
 ## Next Steps
 
