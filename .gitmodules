@@ -1,0 +1,7 @@
+[submodule "Cinder"]
+	path = Cinder
+	url = git@github.com:cinder/Cinder.git
+[submodule "BrainBuster/blocks/OpenCV"]
+	path = BrainBuster/blocks/OpenCV
+	url = git@github.com:HackTheDinos/Cinder-OpenCV.git
+	branch = dev

@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "D95ABCFC08C0CF44848784655E8065535EEB2BFB",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "D95ABCFC08C0CF44848784655E8065535EEB2BFB" : 0,
+    "D1D31A4D1B0CCC9B03A2D107004B38DEFF7D8FBE" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "B762C672-B029-41B2-BD98-6F8D5C8826A2",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "D95ABCFC08C0CF44848784655E8065535EEB2BFB" : "DinoJerks\/",
+    "D1D31A4D1B0CCC9B03A2D107004B38DEFF7D8FBE" : "DinoJerks\/BrainBuster\/blocks\/OpenCV\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "BrainTest",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "BrainBuster\/xcode\/BrainTest.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:HackTheDinos\/Cinder-OpenCV.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "D1D31A4D1B0CCC9B03A2D107004B38DEFF7D8FBE"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:HackTheDinos\/DinoJerks.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "D95ABCFC08C0CF44848784655E8065535EEB2BFB"
+    }
+  ]
+}
